@@ -1,0 +1,36 @@
+[
+
+  {
+    "ParameterKey": "VPCName",
+    "ParameterValue": "CustomVPC"
+  },
+  {
+    "ParameterKey": "VPCCIDRBlock",
+    "ParameterValue": "10.0.0.0/16"
+  },
+  {
+    "ParameterKey": "Subnet01CIDR",
+    "ParameterValue": "10.0.16.0/20"
+  },
+  {
+    "ParameterKey": "Subnet02CIDR",
+    "ParameterValue": "10.0.32.0/20"
+  },
+  {
+    "ParameterKey": "Subnet03CIDR",
+    "ParameterValue": "10.0.48.0/20"
+  },
+  {
+    "ParameterKey": "Subnet01AvailabilityZone",
+    "ParameterValue": "us-east-1f"
+  },
+  {
+    "ParameterKey": "Subnet02AvailabilityZone",
+    "ParameterValue": "us-east-1a"
+  },
+  {
+    "ParameterKey": "Subnet03AvailabilityZone",
+    "ParameterValue": "us-east-1b"
+  }
+
+]
