@@ -58,8 +58,8 @@
         "CidrBlock": {
           "Ref": "VPCCIDRBlock"
         },
-        "EnableDnsSupport": "false",
-        "EnableDnsHostnames": "false",
+        "EnableDnsSupport": "true",
+        "EnableDnsHostnames": "true",
         "InstanceTenancy": "default",
         "Tags": [
           {
