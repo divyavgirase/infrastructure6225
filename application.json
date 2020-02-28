@@ -1,0 +1,446 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Cloud Formation template for VPC, Subnets, Internet Gateway and Route Table",
+  "Parameters": {
+    "VPCName": {
+      "Type": "String",
+      "Default": "myVPC",
+      "Description": "Enter name for VPC",
+      "NoEcho": true
+    },
+    "VPCCIDRBlock": {
+      "Type": "String",
+      "Default": "10.0.0.0/16",
+      "Description": "Enter CIDR range for VPC",
+      "NoEcho": true
+    },
+    "Subnet01CIDR": {
+      "Type": "String",
+      "Default": "10.0.16.0/20",
+      "Description": "Enter CIDR range for Subnet01",
+      "NoEcho": true
+    },
+    "Subnet02CIDR": {
+      "Type": "String",
+      "Default": "10.0.32.0/20",
+      "Description": "Enter CIDR range for Subnet02",
+      "NoEcho": true
+    },
+    "Subnet03CIDR": {
+      "Type": "String",
+      "Default": "10.0.48.0/20",
+      "Description": "Enter CIDR range for Subnet03",
+      "NoEcho": true
+    },
+    "Subnet01AvailabilityZone": {
+      "Type": "String",
+      "Default": "us-east-1f",
+      "Description": "Enter Avilability Zone for Subnet01",
+      "NoEcho": true
+    },
+    "Subnet02AvailabilityZone": {
+      "Type": "String",
+      "Default": "us-east-1a",
+      "Description": "Enter Avilability Zone for Subnet02",
+      "NoEcho": true
+    },
+    "Subnet03AvailabilityZone": {
+      "Type": "String",
+      "Default": "us-east-1b",
+      "Description": "Enter Avilability Zone for Subnet03",
+      "NoEcho": true
+    },
+    "dbuser" : {
+      "Type" : "String",
+      "Default" : "postgres",
+      "NoEcho" : true
+    },
+    "dbpswd" : {
+      "Type" : "String",
+      "Default" : "postgres",
+      "NoEcho" : true
+    }
+  },
+  "Resources": {
+    "myVPC": {
+      "Type": "AWS::EC2::VPC",
+      "Properties": {
+        "CidrBlock": {
+          "Ref": "VPCCIDRBlock"
+        },
+        "EnableDnsSupport": "true",
+        "EnableDnsHostnames": "true",
+        "InstanceTenancy": "default",
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": {"Ref":"VPCName"}
+          }
+        ]
+      }
+    },
+    "mySubnetRegion1": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {
+          "Ref": "myVPC"
+        },
+        "CidrBlock": {
+          "Ref": "Subnet01CIDR"
+        },
+        "AvailabilityZone": {
+          "Ref": "Subnet01AvailabilityZone"
+        },
+        "MapPublicIpOnLaunch": "true",
+        "Tags": [
+          {
+            "Key": "subnetRegion",
+            "Value": "Region1"
+          }
+        ]
+      }
+    },
+    "mySubnetRegion1TableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": {
+          "Ref": "mySubnetRegion1"
+        },
+        "RouteTableId": {
+          "Ref": "myRouteTable"
+        }
+      }
+    },
+    "mySubnetRegion2": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {
+          "Ref": "myVPC"
+        },
+        "CidrBlock": {
+          "Ref": "Subnet02CIDR"
+        },
+        "AvailabilityZone": {
+          "Ref": "Subnet02AvailabilityZone"
+        },
+        "MapPublicIpOnLaunch": "true",
+        "Tags": [
+          {
+            "Key": "subnetRegion",
+            "Value": "Region2"
+          }
+        ]
+      }
+    },
+    "mySubnetRegion2TableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": {
+          "Ref": "mySubnetRegion2"
+        },
+        "RouteTableId": {
+          "Ref": "myRouteTable"
+        }
+      }
+    },
+    "mySubnetRegion3": {
+      "Type": "AWS::EC2::Subnet",
+      "Properties": {
+        "VpcId": {
+          "Ref": "myVPC"
+        },
+        "CidrBlock": {
+          "Ref": "Subnet03CIDR"
+        },
+        "AvailabilityZone": {
+          "Ref": "Subnet03AvailabilityZone"
+        },
+        "MapPublicIpOnLaunch": "true",
+        "Tags": [
+          {
+            "Key": "subnetRegion",
+            "Value": "Region3"
+          }
+        ]
+      }
+    },
+    "mySubnetRegion3TableAssociation": {
+      "Type": "AWS::EC2::SubnetRouteTableAssociation",
+      "Properties": {
+        "SubnetId": {
+          "Ref": "mySubnetRegion3"
+        },
+        "RouteTableId": {
+          "Ref": "myRouteTable"
+        }
+      }
+    },
+    "myInternetGateway": {
+      "Type": "AWS::EC2::InternetGateway",
+      "Properties": {
+        "Tags": [
+          {
+            "Key": "internetGatewayFor",
+            "Value": "myVPC"
+          }
+        ]
+      }
+    },
+    "AttachGateway": {
+      "Type": "AWS::EC2::VPCGatewayAttachment",
+      "Properties": {
+        "VpcId": {
+          "Ref": "myVPC"
+        },
+        "InternetGatewayId": {
+          "Ref": "myInternetGateway"
+        }
+      }
+    },
+    "myRouteTable": {
+      "Type": "AWS::EC2::RouteTable",
+      "Properties": {
+        "VpcId": {
+          "Ref": "myVPC"
+        },
+        "Tags": [
+          {
+            "Key": "routeTableFor",
+            "Value": "myVPC"
+          }
+        ]
+      }
+    },
+    "myRoute": {
+      "Type": "AWS::EC2::Route",
+      "DependsOn": "AttachGateway",
+      "Properties": {
+        "RouteTableId": {
+          "Ref": "myRouteTable"
+        },
+        "DestinationCidrBlock": "0.0.0.0/0",
+        "GatewayId": {
+          "Ref": "myInternetGateway"
+        }
+      }
+    },
+
+    "webappSG" :  {
+          "Type" : "AWS::EC2::SecurityGroup",
+          "Properties" : {
+           "GroupDescription" : "Web application security group",
+           "GroupName" : "application",
+           "VpcId" : {"Ref" : "myVPC"},
+           "SecurityGroupIngress" : [
+                    { "IpProtocol" : "tcp", "FromPort" : 80, "ToPort" : 80, "CidrIp" : "0.0.0.0/0",  "Description" : "HTTP Port" },
+                    { "IpProtocol" : "tcp", "FromPort" : 22, "ToPort" : 22, "CidrIp" : "0.0.0.0/0",  "Description" : "SSH Port" },
+                    { "IpProtocol" : "tcp", "FromPort" : 443, "ToPort" : 443, "CidrIp" : "0.0.0.0/0", "Description" : "HTTPS Port" }
+                  ]
+        }
+},
+
+
+"databaseSG" : {
+        "Type" : "AWS::EC2::SecurityGroup",
+        "Properties" : {
+          "GroupDescription" : "Database security group",
+          "GroupName" : "database",
+          "VpcId" : {"Ref" : "myVPC"}
+        }
+
+},
+
+"databaseSGIngress" : {
+         "Type": "AWS::EC2::SecurityGroupIngress",
+         "Properties": {
+            "GroupId": { "Ref": "databaseSG" },
+            "IpProtocol": "tcp",
+            "FromPort": 5432,
+            "ToPort": 5432,
+            "SourceSecurityGroupId": {
+               "Fn::GetAtt": [
+                  "webappSG",
+                  "GroupId"
+               ]
+            }
+         } 
+},
+
+
+
+"BucketIAMPolicy" : {
+    "Type": "AWS::IAM::ManagedPolicy",
+    "Properties": {
+        "ManagedPolicyName": "WebAppS3",
+        "Description" : "Policy to manage S3 bucket",
+        "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Effect": "Allow",
+                    "Action": [ "s3:*" ],
+                    "Resource": { "Fn::Join": [ "", ["arn:aws:s3:::",{"Ref": "S3Bucket"},"/*"]]}
+
+                }
+            ]
+        }
+
+    }
+},
+
+
+
+
+
+
+"IAMRoleBucket" : {
+  "Type" : "AWS::IAM::Role",
+  "Properties" : {
+    "RoleName" : "EC2-CSYE6225123",
+     "Description" : "Role to access S3 Bucket",
+      "AssumeRolePolicyDocument": {
+               "Version" : "2012-10-17",
+               "Statement": [ {
+                  "Effect": "Allow",
+                  "Principal": {
+                     "Service": [ "ec2.amazonaws.com" ]
+                  },
+                  "Action": [ "sts:AssumeRole" ]
+               } ]
+            },
+        "ManagedPolicyArns": [{"Ref" : "BucketIAMPolicy"}]
+
+  }
+},
+
+"MyInstanceProfile": {
+         "Type": "AWS::IAM::InstanceProfile",
+         "Properties": {
+            "Roles": [ {
+               "Ref": "IAMRoleBucket"
+            } ]
+         }
+      },
+
+
+
+   "S3Bucket" : {
+   "Type" : "AWS::S3::Bucket",
+   "Properties": {
+   "AccessControl" : "Private",
+   "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256"
+              }
+            }
+          ]
+        },
+    "LifecycleConfiguration" : { 
+         "Rules" : 
+            [ 
+              {
+              "Status" : "Enabled",
+              "Transitions" : 
+                  [
+                     {
+                       "StorageClass" : "STANDARD_IA",
+                       "TransitionInDays" : 30
+                     }
+                  ]
+              } 
+            ] 
+        }
+      }
+    },
+
+  "ec2Instance" : {
+  "Type" : "AWS::EC2::Instance",
+  "Properties" : {
+    "ImageId" : "ami-0804e2faaa0f4faf9",
+    "NetworkInterfaces" : [{
+      "SubnetId" : {"Ref" : "mySubnetRegion2"},
+      "AssociatePublicIpAddress": "true",
+      "DeviceIndex": "0",
+      "GroupSet":  [{"Fn::GetAtt": [ "webappSG","GroupId" ] }]
+    }],
+    "InstanceType" : "t2.micro",
+    "BlockDeviceMappings" : [
+         {
+            "DeviceName" : "/dev/sda1",
+            "Ebs" : {
+              "VolumeType" : "gp2",
+              "DeleteOnTermination" : "true",
+              "VolumeSize" : "20"
+            }
+          }, 
+          {
+            "DeviceName" : "/dev/sdk",
+            "NoDevice" : {}
+          }
+      ],
+    "Tags" : [ { "Key" : "Name", "Value" : "myEC2" } ],
+    "IamInstanceProfile" : {"Ref" : "MyInstanceProfile"},
+    "KeyName": "awswebapp",
+    "UserData" : {
+        "Fn::Base64" : {
+            "Fn::Join" : ["", [
+                                "#!/bin/bash -xe\n",
+                                "echo DBHostname.url=",{"Fn::GetAtt": ["RDSInstance","Endpoint.Address"]}," >> /home/ubuntu/webapp.properties\n",
+                                "echo DBUsername.url=",{"Ref":"dbuser"}," >> /home/ubuntu/webapp.properties\n",
+                                "echo S3Bucket=",{"Ref":"S3Bucket"}," >> /home/ubuntu/webapp.properties\n",
+                                "echo DBUserPassword.url=",{"Ref":"dbuser"}," >> /home/ubuntu/webapp.properties\n",
+                                "Database=",{"Fn::GetAtt" : ["RDSInstance","Endpoint.Address"]},"&",
+                                "DBUser=",{"Ref":"dbuser"}, "&",
+                                "DBPassword=",{"Ref":"dbpswd"}, "&",
+                                "S3Bucket=",{ "Fn::Join": [ "", ["arn:aws:s3:::",{"Ref": "S3Bucket"},"/*"]]}
+
+                                
+                              ]
+                          ]
+          }
+        }
+  }
+},
+
+"DBSubnetGroup" : {
+  "Type" : "AWS::RDS::DBSubnetGroup",
+  "Properties" : {
+     "DBSubnetGroupDescription" : "Subnet group for DBS",
+     "DBSubnetGroupName" : "DBSubnet",
+      "SubnetIds": [ {"Ref":"mySubnetRegion1"},
+                     {"Ref":"mySubnetRegion3"}
+                ],
+      "Tags": [
+                    {
+                        "Key": "db",
+                        "Value": "dbsubnet"
+                    }
+                ]
+  }
+},
+
+"RDSInstance" : {
+  "Type" : "AWS::RDS::DBInstance",
+   "Properties" : {
+      "Engine" : "postgres",
+      "DBInstanceClass" : "db.t3.micro",
+      "MultiAZ" : false,
+      "DBInstanceIdentifier" : "csye6225-spring2020",
+      "MasterUsername" : {"Ref": "dbuser"},
+      "MasterUserPassword" : {"Ref":"dbpswd"},
+      "DBSubnetGroupName" : {"Ref" : "DBSubnetGroup"},
+      "PubliclyAccessible" : false,
+      "DBName" : "csye6225",
+      "VPCSecurityGroups" : [{"Ref":"databaseSG"}],
+      "AllocatedStorage": "5"
+
+   }
+  }
+
+
+  }
+
+
+}
