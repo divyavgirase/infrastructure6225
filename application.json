@@ -362,7 +362,7 @@
   "ec2Instance" : {
   "Type" : "AWS::EC2::Instance",
   "Properties" : {
-    "ImageId" : "ami-0804e2faaa0f4faf9",
+    "ImageId" : "ami-07b3392e12e7e32f5",
     "NetworkInterfaces" : [{
       "SubnetId" : {"Ref" : "mySubnetRegion2"},
       "AssociatePublicIpAddress": "true",
@@ -386,7 +386,7 @@
       ],
     "Tags" : [ { "Key" : "Name", "Value" : "myEC2" } ],
     "IamInstanceProfile" : {"Ref" : "MyInstanceProfile"},
-    "KeyName": "awswebapp",
+    "KeyName": "awsprod",
     "UserData" : {
         "Fn::Base64" : {
             "Fn::Join" : ["", [
