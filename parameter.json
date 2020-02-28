@@ -31,6 +31,22 @@
   {
     "ParameterKey": "Subnet03AvailabilityZone",
     "ParameterValue": "us-east-1b"
+  },
+  {
+    "ParameterKey": "dbuser",
+    "ParameterValue": "postgres"
+  },
+  {
+    "ParameterKey": "dbpswd",
+    "ParameterValue": "postgres"
+  },
+  {
+    "ParameterKey": "RDSInstanceSize",
+    "ParameterValue": "5"
+  },
+  {
+    "ParameterKey": "EC2InstanceSize",
+    "ParameterValue": "20"
   }
 
 ]
