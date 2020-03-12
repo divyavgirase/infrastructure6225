@@ -47,6 +47,23 @@
   {
     "ParameterKey": "EC2InstanceSize",
     "ParameterValue": "20"
+  },
+  {
+    "ParameterKey": "AMIID",
+    "ParameterValue": "ami-05e56c55a4e75856d"
+  },
+  {
+    "ParameterKey": "awskey",
+    "ParameterValue": "awsprod"
+  },
+    {
+    "ParameterKey": "AccountID",
+    "ParameterValue": "426074488037"
+  },
+    {
+    "ParameterKey": "AWSRegion",
+    "ParameterValue": "us-east-2"
   }
+
 
 ]
