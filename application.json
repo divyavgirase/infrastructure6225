@@ -343,7 +343,7 @@
   "Roles": [ 
     {
       "Ref" : "CodeDeployEC2ServiceRole"
-    } 
+    }
   ]
 }
 },
@@ -635,7 +635,7 @@
        "Action": [ "sts:AssumeRole" ]
      } ]
      },
-     "ManagedPolicyArns": [{"Ref" : "CodeDeployEC2S3"}, {"Ref" : "BucketIAMPolicy"}]
+     "ManagedPolicyArns": [{"Ref" : "CodeDeployEC2S3"}, {"Ref" : "BucketIAMPolicy"}, "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"]
 
    }
  },
