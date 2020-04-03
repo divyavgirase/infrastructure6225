@@ -50,7 +50,7 @@
   },
   {
     "ParameterKey": "AMIID",
-    "ParameterValue": "ami-35a6737dc2f3d34e"
+    "ParameterValue": "ami-079dde8d4ace5ff94"
   },
   {
     "ParameterKey": "awskey",
@@ -62,7 +62,7 @@
   },
     {
     "ParameterKey": "AWSRegion",
-    "ParameterValue": "us-east-2"
+    "ParameterValue": "us-east-1"
   }
 
 
