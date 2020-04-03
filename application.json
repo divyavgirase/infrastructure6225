@@ -516,20 +516,20 @@
 
 "CircleCiLambda":{
  "Type": "AWS::IAM::ManagedPolicy",
-   "Properties": {
-    "ManagedPolicyName": "CircleCiLambda",
-    "Description" : "Policy to allow CircleCI to call Code Update on lambda",
-        "PolicyDocument": {
-      "Version": "2012-10-17",
-      "Statement": [{
-            "Effect": "Allow",
-            "Action": "lambda:UpdateFunctionCode",
-            "Resource" : { "Fn::Join": [ "", ["arn:aws:lambda:", {"Ref": "AWSRegion"}, ":", {"Ref": "AccountID"}, ":function:MailClient"]]}
-          }
-      ]
-    },
-     "Users" : ["circleci"]
-  }
+ "Properties": {
+  "ManagedPolicyName": "CircleCiLambda",
+  "Description" : "Policy to allow CircleCI to call Code Update on lambda",
+  "PolicyDocument": {
+    "Version": "2012-10-17",
+    "Statement": [{
+      "Effect": "Allow",
+      "Action": "lambda:UpdateFunctionCode",
+      "Resource" : { "Fn::Join": [ "", ["arn:aws:lambda:", {"Ref": "AWSRegion"}, ":", {"Ref": "AccountID"}, ":function:MailClient"]]}
+    }
+  ]
+  },
+  "Users" : ["circleci"]
+}
 },
 
 "CircleCICodeDeploy" : {
@@ -607,9 +607,9 @@
    } ]
    },
    "ManagedPolicyArns": [{"Ref" : "CodeDeployEC2S3"}, {"Ref" : "BucketIAMPolicy"}, "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy",
-                        "arn:aws:iam::aws:policy/AmazonSQSFullAccess",
-                        "arn:aws:iam::aws:policy/AmazonSNSFullAccess"
-                      ]
+    "arn:aws:iam::aws:policy/AmazonSQSFullAccess",
+    "arn:aws:iam::aws:policy/AmazonSNSFullAccess"
+  ]
 
 
  }
@@ -648,12 +648,12 @@
   "Properties" : {
     "DeploymentGroupName" : "csye6225webappdeployment",
     "ApplicationName": { "Ref": "CodeDeployApplication" },
- "AutoScalingGroups" : [ {"Ref" : "WebappAutoScaleGroup" } ],   
+    "AutoScalingGroups" : [ {"Ref" : "WebappAutoScaleGroup" } ],   
     "ServiceRoleArn" :{ "Fn::GetAtt" : [ "CodeDeployServiceRole",  "Arn" ] },
     "DeploymentStyle" : {
       "DeploymentOption" : "WITHOUT_TRAFFIC_CONTROL",
-       "DeploymentType" : "IN_PLACE"
-     
+      "DeploymentType" : "IN_PLACE"
+      
 
     },
     "LoadBalancerInfo" : {
@@ -738,21 +738,21 @@
 },
 
 
- "InstanceSecurityGroup" : {
-      "Type" : "AWS::EC2::SecurityGroup",
-      "Properties" : {
-        "GroupDescription" : "Enable HTTP from the load balancer only",
-        "SecurityGroupIngress" : [
-        {
-          "IpProtocol" : "tcp",
-          "FromPort" : "80",
-          "ToPort" : "80",
-          "SourceSecurityGroupId" : {"Fn::Select" : [0, {"Fn::GetAtt" : ["myLoadBalancer", "SecurityGroups"]}]}
-        } ],
-        "VpcId" : { "Ref" : "myVPC" }
-      }
-    
-  },
+"InstanceSecurityGroup" : {
+  "Type" : "AWS::EC2::SecurityGroup",
+  "Properties" : {
+    "GroupDescription" : "Enable HTTP from the load balancer only",
+    "SecurityGroupIngress" : [
+      {
+        "IpProtocol" : "tcp",
+        "FromPort" : "80",
+        "ToPort" : "80",
+        "SourceSecurityGroupId" : {"Fn::Select" : [0, {"Fn::GetAtt" : ["myLoadBalancer", "SecurityGroups"]}]}
+      } ],
+    "VpcId" : { "Ref" : "myVPC" }
+  }
+  
+},
 
 
 "myLoadBalancer" : {
@@ -761,7 +761,7 @@
     "Name" : "myLoadBalancer",
     "Subnets" : [ {"Ref" : "mySubnetRegion1"}, {"Ref" : "mySubnetRegion2"}, {"Ref" : "mySubnetRegion3"} ],
     "Type" : "application",
-     "SecurityGroups" : [{"Ref":"webappSG"}]
+    "SecurityGroups" : [{"Ref":"webappSG"}]
   }
 },
 
@@ -892,15 +892,15 @@
 "SNSTopic" : {
   "Type" : "AWS::SNS::Topic",
   "Properties" : {
-      "DisplayName" : "CSYETopic",
-
-      "Subscription" : [ {
-        "Endpoint" : {"Fn::GetAtt" : ["AWSLambda", "Arn"] },
-        "Protocol" : "lambda"
-      }],
-      "TopicName" : "CSYETopic"
-    }
+    "DisplayName" : "CSYETopic",
+    "TopicName" : "CSYETopic",
+    "Subscription" : [{
+      "Endpoint" : { "Fn::GetAtt" : [ "AWSLambda", "Arn" ] },
+      "Protocol" : "lambda"
+    }]
+  }
 },
+
 
 "AWSLambda" : {
   "Type" : "AWS::Lambda::Function",
@@ -908,77 +908,90 @@
     "Code" : {
       "ZipFile" : "DEPLOY SERVLERLESS BRANCH TO UPDATE CODE"
     },
-     "Description" : "AWS Lambda function to send mail",
-     "FunctionName" : "MailClient",
-      "Runtime" : "python2.7",
-      "Handler":"index.lambda_handler",
-      "Role": {"Fn::GetAtt" : ["SNSLambdaRole", "Arn"] }
-      
+    "Description" : "AWS Lambda function to send mail",
+    "FunctionName" : "MailClient",
+    "Runtime" : "python2.7",
+    "Handler":"index.lambda_handler",
+    "Role": {"Fn::GetAtt" : ["SNSLambdaRole", "Arn"] },
+    "MemorySize":512,
+    "Timeout" :30
+    
   }
 },
+
+"AWSLambdaInvocation": {
+  "Type": "AWS::Lambda::Permission",
+  "Properties": {
+    "FunctionName": { "Fn::GetAtt": ["AWSLambda","Arn"]},
+    "Action": "lambda:InvokeFunction",
+    "Principal": "sns.amazonaws.com",
+    "SourceArn": {"Ref": "SNSTopic"}
+  }
+},
+
+
 
 "SNSLambdaRole" : {
   "Type" : "AWS::IAM::Role",
   "Properties" : {
-     "Description" : "Role for Lambda to access dynamodb, cloudwatch and sns",
-      "AssumeRolePolicyDocument": {
-                    "Version": "2012-10-17",
-                    "Statement": [
-                        {
-                            "Effect": "Allow",
-                            "Principal": {
-                                "Service": [
-                                    "lambda.amazonaws.com"
-                                ]
-                            },
-                            "Action": [
-                                "sts:AssumeRole"
-                            ]
-                        }
-                    ]
-                },
-       "ManagedPolicyArns" : [
-                "arn:aws:iam::aws:policy/CloudWatchFullAccess", 
-                "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess", 
-                "arn:aws:iam::aws:policy/AmazonSESFullAccess"
-              ],
-      "RoleName" : "SNSLambdaRole"    
+   "Description" : "Role for Lambda to access dynamodb, cloudwatch and sns",
+   "AssumeRolePolicyDocument": {
+    "Version": "2012-10-17",
+    "Statement": [
+      {
+        "Effect": "Allow",
+        "Principal": {
+          "Service": [
+            "lambda.amazonaws.com"
+          ]
+        },
+        "Action": [
+          "sts:AssumeRole"
+        ]
+      }
+    ]
+  },
+  "ManagedPolicyArns" : [
+    "arn:aws:iam::aws:policy/CloudWatchFullAccess", 
+    "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess", 
+    "arn:aws:iam::aws:policy/AmazonSESFullAccess"
+  ],
+  "RoleName" : "SNSLambdaRole"    
 
-  }
+}
 
 },
 
 "mySQS" : {
   "Type" : "AWS::SQS::Queue",
   "Properties" : {
-     "QueueName" : "mySQS",
-  }
+   "QueueName" : "mySQS",
+ }
 },
-
 
 "DynamoDB" : {
   "Type" : "AWS::DynamoDB::Table",
   "Properties" : {
-      "AttributeDefinitions" : [
+    "AttributeDefinitions" : [
       {
         "AttributeName" : "username",
         "AttributeType" : "S"        
       }
     ],
-     "KeySchema" : [{
-        
-          "AttributeName" : "username",
-          "KeyType" : "HASH"
-        }],
-             "ProvisionedThroughput" : {
-          "ReadCapacityUnits" : "5",
-          "WriteCapacityUnits" : "5"
-        },
-      "TableName" : "Tokens",
-      "TimeToLiveSpecification" : {
-  "AttributeName" : "timetolive",
-  "Enabled" : true
-}
+    "KeySchema" : [{
+      
+      "AttributeName" : "username",
+      "KeyType" : "HASH"
+    }],
+    "ProvisionedThroughput" : {
+      "ReadCapacityUnits" : "5",
+      "WriteCapacityUnits" : "5"
+    },
+    "TableName" : "Tokens",
+    "TimeToLiveSpecification" : {
+      "AttributeName" : "timetolive",
+      "Enabled" : true
+    }
 
   }
 }
