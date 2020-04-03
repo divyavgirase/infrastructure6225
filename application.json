@@ -955,6 +955,7 @@
   }
 },
 
+
 "DynamoDB" : {
   "Type" : "AWS::DynamoDB::Table",
   "Properties" : {
