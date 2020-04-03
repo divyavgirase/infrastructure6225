@@ -87,7 +87,7 @@
     },
     "AWSRegion" : {
       "Type" : "String",
-      "Default" : "us-east-2",
+      "Default" : "us-east-1",
       "NoEcho" : true
     }
   },
@@ -429,7 +429,7 @@
         {
           "Effect": "Allow",
           "Action": [ "s3:Get*", "s3:List*"],
-          "Resource": "arn:aws:s3:::codedeploy1.divya-girase.me/*"
+          "Resource": "arn:aws:s3:::codedeploy.divya-girase.me/*"
 
         }
       ]
@@ -505,12 +505,30 @@
         {
           "Effect": "Allow",
           "Action": ["s3:PutObject", "s3:Get*", "s3:List*"],
-          "Resource": "arn:aws:s3:::codedeploy1.divya-girase.me/*"
+          "Resource": "arn:aws:s3:::codedeploy.divya-girase.me/*"
         }
       ]
     },
     "Users" : ["circleci"]
 
+  }
+},
+
+"CircleCiLambda":{
+ "Type": "AWS::IAM::ManagedPolicy",
+   "Properties": {
+    "ManagedPolicyName": "CircleCiLambda",
+    "Description" : "Policy to allow CircleCI to call Code Update on lambda",
+        "PolicyDocument": {
+      "Version": "2012-10-17",
+      "Statement": [{
+            "Effect": "Allow",
+            "Action": "lambda:UpdateFunctionCode",
+            "Resource" : { "Fn::Join": [ "", ["arn:aws:lambda:", {"Ref": "AWSRegion"}, ":", {"Ref": "AccountID"}, ":function:MailClient"]]}
+          }
+      ]
+    },
+     "Users" : ["circleci"]
   }
 },
 
@@ -588,7 +606,11 @@
      "Action": [ "sts:AssumeRole" ]
    } ]
    },
-   "ManagedPolicyArns": [{"Ref" : "CodeDeployEC2S3"}, {"Ref" : "BucketIAMPolicy"}, "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"]
+   "ManagedPolicyArns": [{"Ref" : "CodeDeployEC2S3"}, {"Ref" : "BucketIAMPolicy"}, "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy",
+                        "arn:aws:iam::aws:policy/AmazonSQSFullAccess",
+                        "arn:aws:iam::aws:policy/AmazonSNSFullAccess"
+                      ]
+
 
  }
 },
@@ -679,6 +701,10 @@
           "echo DBUsername.url=",{"Ref":"dbuser"}," >> /home/ubuntu/webapp.properties\n",
           "echo S3Bucket=",{"Ref":"S3Bucket"}," >> /home/ubuntu/webapp.properties\n",
           "echo DBUserPassword.url=",{"Ref":"dbuser"}," >> /home/ubuntu/webapp.properties\n",
+          "echo SQS.region=",{"Ref": "AWSRegion"}," >> /home/ubuntu/webapp.properties\n",
+          "echo SNS.region=",{"Ref": "AWSRegion"}," >> /home/ubuntu/webapp.properties\n",
+          "echo SQS.arn=",{"Ref":"mySQS"}," >> /home/ubuntu/webapp.properties\n",
+          "echo SNS.Topic=",{"Ref":"SNSTopic"}," >> /home/ubuntu/webapp.properties\n",
           "Database=",{"Fn::GetAtt" : ["RDSInstance","Endpoint.Address"]},"&",
           "DBUser=",{"Ref":"dbuser"}, "&",
           "DBPassword=",{"Ref":"dbpswd"}, "&",
@@ -797,7 +823,7 @@
 "CPUAlarmHigh": {
   "Type": "AWS::CloudWatch::Alarm",
   "Properties": {
-    "AlarmDescription": "Scale-up if CPU > 90% for 10 minutes",
+    "AlarmDescription": "Scale-up if CPU > 5% for 10 minutes",
     "MetricName": "CPUUtilization",
     "Namespace": "AWS/EC2",
     "Statistic": "Average",
@@ -824,7 +850,7 @@
 "CPUAlarmLow": {
   "Type": "AWS::CloudWatch::Alarm",
   "Properties": {
-    "AlarmDescription": "Scale-down if CPU < 70% for 10 minutes",
+    "AlarmDescription": "Scale-down if CPU < 3% for 10 minutes",
     "MetricName": "CPUUtilization",
     "Namespace": "AWS/EC2",
     "Statistic": "Average",
@@ -861,6 +887,100 @@
   "Name" : "prod.divya-girase.me.",
   "Type" : "A"
 }
+},
+
+"SNSTopic" : {
+  "Type" : "AWS::SNS::Topic",
+  "Properties" : {
+      "DisplayName" : "CSYETopic",
+
+      "Subscription" : [ {
+        "Endpoint" : {"Fn::GetAtt" : ["AWSLambda", "Arn"] },
+        "Protocol" : "lambda"
+      }],
+      "TopicName" : "CSYETopic"
+    }
+},
+
+"AWSLambda" : {
+  "Type" : "AWS::Lambda::Function",
+  "Properties" : {
+    "Code" : {
+      "ZipFile" : "DEPLOY SERVLERLESS BRANCH TO UPDATE CODE"
+    },
+     "Description" : "AWS Lambda function to send mail",
+     "FunctionName" : "MailClient",
+      "Runtime" : "python2.7",
+      "Handler":"index.lambda_handler",
+      "Role": {"Fn::GetAtt" : ["SNSLambdaRole", "Arn"] }
+      
+  }
+},
+
+"SNSLambdaRole" : {
+  "Type" : "AWS::IAM::Role",
+  "Properties" : {
+     "Description" : "Role for Lambda to access dynamodb, cloudwatch and sns",
+      "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Service": [
+                                    "lambda.amazonaws.com"
+                                ]
+                            },
+                            "Action": [
+                                "sts:AssumeRole"
+                            ]
+                        }
+                    ]
+                },
+       "ManagedPolicyArns" : [
+                "arn:aws:iam::aws:policy/CloudWatchFullAccess", 
+                "arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess", 
+                "arn:aws:iam::aws:policy/AmazonSESFullAccess"
+              ],
+      "RoleName" : "SNSLambdaRole"    
+
+  }
+
+},
+
+"mySQS" : {
+  "Type" : "AWS::SQS::Queue",
+  "Properties" : {
+     "QueueName" : "mySQS",
+  }
+},
+
+
+"DynamoDB" : {
+  "Type" : "AWS::DynamoDB::Table",
+  "Properties" : {
+      "AttributeDefinitions" : [
+      {
+        "AttributeName" : "username",
+        "AttributeType" : "S"        
+      }
+    ],
+     "KeySchema" : [{
+        
+          "AttributeName" : "username",
+          "KeyType" : "HASH"
+        }],
+             "ProvisionedThroughput" : {
+          "ReadCapacityUnits" : "5",
+          "WriteCapacityUnits" : "5"
+        },
+      "TableName" : "Tokens",
+      "TimeToLiveSpecification" : {
+  "AttributeName" : "timetolive",
+  "Enabled" : true
+}
+
+  }
 }
 
 
