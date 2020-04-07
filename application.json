@@ -768,7 +768,7 @@
 "LoadBalancerListener" : {
   "Type" : "AWS::ElasticLoadBalancingV2::Listener",
   "Properties" : {
-
+  "Certificates" : [{"CertificateArn" : "arn:aws:acm:us-east-1:426074488037:certificate/5713b5bc-d3cd-4b32-86b8-71c4620d5aeb"}],
    "DefaultActions": [
     {
       "Type": "forward",
@@ -776,9 +776,8 @@
     }
   ],
    "LoadBalancerArn" : {"Ref" : "myLoadBalancer"},
-   "Port" : 80,
-   "Protocol" : "HTTP"
-
+   "Port" : 443,
+   "Protocol" : "HTTPS"
  }
 },
 
