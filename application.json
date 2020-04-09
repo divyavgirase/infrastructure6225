@@ -413,10 +413,26 @@
     "PubliclyAccessible" : false,
     "DBName" : "csye6225",
     "VPCSecurityGroups" : [{"Ref":"databaseSG"}],
-    "AllocatedStorage": {"Ref":"RDSInstanceSize"}
+    "AllocatedStorage": {"Ref":"RDSInstanceSize"},
+    "DBParameterGroupName" : {"Ref" : "RDSDBParameterGroup"},
+    "StorageEncrypted" : true
 
   }
 },
+
+
+    "RDSDBParameterGroup": {
+        "Type": "AWS::RDS::DBParameterGroup",
+        "Properties": {
+            "Description": "CloudFormation Sample Parameter Group",
+            "Family": "postgres11",
+            "Parameters": {
+                "rds.force_ssl": 1,
+                "log_connections":1
+            }
+        }
+    },
+
 
 "CodeDeployEC2S3" : {
   "Type": "AWS::IAM::ManagedPolicy",
