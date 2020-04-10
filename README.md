@@ -16,3 +16,6 @@ aws cloudformation create-stack --stack-name {stack_name} --region {region_name}
 **Step To Delete Stack**
 aws cloudformation delete-stack --stack-name {stack_name}
 
+**Step To Upload SSL Certificate**
+aws acm import-certificate --certificate file://prod_divya-girase_me.crt --certificate-chain file://prod_divya-girase_me.ca-bundle --private-key file://private-key.pem --profile prod
+
